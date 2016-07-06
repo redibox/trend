@@ -80,7 +80,7 @@ kittensTrend.incr({
 
 #### Fetch all items in a trend
 
-The are pre-sorted highest score descending.
+These are pre-sorted highest score descending.
 
 ```js
 kittensTrend.fetch().then((items) => {

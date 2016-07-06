@@ -111,6 +111,7 @@ export default class Delta {
     const secondarySet = this.getSet(o.secondary);
     if (!secondarySet) return Promise.reject(new Error('Unable to initialize secondary Set!'));
 
+    /* eslint arrow-body-style:0 */
     return Promise.join(primarySet.fetch(o), secondarySet.fetch(o), (count, norm) => {
       return { count, norm };
     });
