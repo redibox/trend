@@ -1,4 +1,4 @@
-[![Coverage Status](https://coveralls.io/repos/github/redibox/trend/badge.svg?branch=master)](https://coveralls.io/github/redibox/trend?branch=master)
+[![Coverage](https://coveralls.io/repos/github/redibox/trend/badge.svg?branch=master)](https://coveralls.io/github/redibox/trend?branch=master)
 ![Downloads](https://img.shields.io/npm/dt/redibox-hook-cache.svg)
 [![npm version](https://img.shields.io/npm/v/redibox-hook-cache.svg)](https://www.npmjs.com/package/redibox-hook-trend)
 [![dependencies](https://img.shields.io/david/redibox/trend.svg)](https://david-dm.org/redibox/trend)
