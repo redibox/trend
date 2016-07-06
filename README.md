@@ -34,7 +34,7 @@ RediBox will automatically load the hook for you.
 
 ### Usage
 
-The examples below assume `Trend` as a reference to `RediBox.hooks.trend`.
+The examples below assume `Trend` as a reference to `RediBox.hooks.trend`
 
 We also use `trend` as a easier term for `distribution` and `item` instead of `bin`.
 
