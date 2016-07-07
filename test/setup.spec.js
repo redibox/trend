@@ -14,18 +14,10 @@ global.some = {
 };
 
 const config = {
-  hooks: {}, schedule: {
-    schedules: [
-      {
-        runs: 'some.coolFunction',
-        data: { live: true },
-        interval: 'every 15 seconds',
-      },
-      {
-        runs: 'some.unCoolFunc',
-        data: { live: true },
-        interval: 'every 30 seconds',
-      },
+  hooks: {},
+  trend: {
+    defaultTrends: [
+      { name: 'kittens', time: 36000 },
     ],
   },
 };
@@ -60,6 +52,11 @@ const clusterConfig = {
         host: '127.0.0.1',
         port: 30006,
       },
+    ],
+  },
+  trend: {
+    defaultTrends: [
+      { name: 'kittens', time: 36000 },
     ],
   },
   hooks: {},

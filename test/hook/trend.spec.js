@@ -1,5 +1,5 @@
 /* eslint no-underscore-dangle: 0 */
-import { assert, expect } from 'chai';
+import { expect } from 'chai';
 import Delta from './../../src/delta';
 // import Hook from './../../src/hook';
 
@@ -22,7 +22,7 @@ function getDays(days) {
  * @param by
  * @returns {Promise.<TResult>}
  */
-function increment(_bin, by = 1, cb) {
+function increment(_bin = bin, by = 1, cb) {
   return Hook
     .get(dist)
     .then(delta => {
@@ -34,8 +34,47 @@ function increment(_bin, by = 1, cb) {
 }
 
 describe('trend', () => {
+  it('should create default delta instances from config', () => {
+    // console.dir(Hook);
+    expect(Hook.kittens instanceof Delta).to.equal(true);
+    return Promise.resolve();
+  });
+
   it('should create a new delta instance', () => {
     return Hook.create({
+      name: dist,
+      time: getDays(14),
+    }).then(_delta => {
+      expect(_delta instanceof Delta).to.equal(true);
+      return Promise.resolve();
+    });
+  });
+
+  it('should getOrCreate a delta instance that doesn\'t exist', () => {
+    const randName = (Math.random() * 100).toString(16);
+    return Hook.getOrCreate({
+      name: randName,
+      time: getDays(14),
+    }).then(_delta => {
+      expect(_delta instanceof Delta).to.equal(true);
+      return Promise.resolve();
+    });
+  });
+
+  it('should getOrCreate a delta instance that doesn\'t exist and attach it to trend hook', () => {
+    const randName = (Math.random() * 100).toString(16);
+    return Hook.getOrCreate({
+      name: randName,
+      time: getDays(14),
+    }, true).then(_delta => {
+      expect(_delta instanceof Delta).to.equal(true);
+      expect(Hook[randName] instanceof Delta).to.equal(true);
+      return Promise.resolve();
+    });
+  });
+
+  it('should getOrCreate a delta instance that already exists', () => {
+    return Hook.getOrCreate({
       name: dist,
       time: getDays(14),
     }).then(_delta => {
@@ -142,7 +181,7 @@ describe('trend', () => {
       .get(dist)
       .then(_delta => _delta.fetch())
       .then(results => {
-        console.dir(results);
+        // console.dir(results);
         expect(typeof results).to.equal(typeof []);
         expect(results.length).to.equal(4);
         return Promise.resolve();
@@ -154,7 +193,7 @@ describe('trend', () => {
       .get(dist)
       .then(_delta => _delta.fetch({ limit: 2 }))
       .then(results => {
-        console.dir(results);
+        // console.dir(results);
         expect(typeof results).to.equal(typeof []);
         expect(results.length).to.equal(2);
         return Promise.resolve();
@@ -167,7 +206,7 @@ describe('trend', () => {
       .get(dist)
       .then(_delta => _delta.fetch({ item: randBin }))
       .then(results => {
-        console.dir(results);
+        // console.dir(results);
         expect(results[0].item).to.equal(randBin);
         expect(results.length).to.equal(1);
         return Promise.resolve();
@@ -181,7 +220,7 @@ describe('trend', () => {
         .get(dist)
         .then(_delta => _delta.fetch({ limit: 1 }))
         .then(results => {
-          console.dir(results);
+          // console.dir(results);
           expect(results[0].item).to.equal(randBin);
           expect(results.length).to.equal(1);
           return done();
