@@ -27,7 +27,7 @@ export default class Delta {
     }, this.hook);
 
     const secondaryPromise = Set.create({
-      key: this.hook.toKey(this.getSecondaryKey()),
+      key: `${this.hook.toKey(this.name)}_2t`,
       time: o.secondaryTime || (o.time * NORM_T_MULT),
       date: secondaryDate,
     }, this.hook);

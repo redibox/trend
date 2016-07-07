@@ -1,7 +1,7 @@
 {
   "name": "redibox-hook-trend",
   "description": "A scalable trending hook designed to track temporal trends in non-stationary categorical distributions.",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "main": "lib/index.js",
   "author": "Mike Diarmid",
   "repository": {
