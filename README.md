@@ -67,6 +67,19 @@ Trend.exists('kittens').then(bool => {
 });
 ```
 
+#### Get an existing trend or create a new trend
+
+```js
+Trend.getOrCreate({
+  // the name of this trend
+  name: 'kittens',
+  // life time of this trend
+  time: 1209600,  // 14 days
+}).then(kittensTrend => {
+  // do things with the trend
+});
+```
+
 #### Incrementing a trend item (bin)
 
 ```js
