@@ -7,9 +7,14 @@ const NORM_T_MULT = 2;
 
 export default class Delta {
 
-  constructor(name, hook) {
+  constructor(name, options, hook) {
     this.hook = hook;
     this.name = name;
+    this.options = options;
+    this.lastScrubAndDecay = null;
+    this.incrSinceLastScrubAndDecay = 0;
+    this.primarySet = this.getSet(this.getPrimaryKey());
+    this.secondarySet = this.getSet(this.getSecondaryKey(), true);
   }
 
   /**
@@ -32,9 +37,15 @@ export default class Delta {
       date: secondaryDate,
     }, this.hook);
 
-    return Promise.join(primaryPromise, secondaryPromise, () =>
-      this
-    );
+    o.secondaryTime = o.secondaryTime || (o.time * NORM_T_MULT);
+
+    this.options = o;
+
+    return Promise.join(primaryPromise, secondaryPromise, res => {
+      this.primarySet = res[0];
+      this.secondarySet = res[1];
+      return this;
+    });
   }
 
   /**
@@ -64,19 +75,30 @@ export default class Delta {
     if (!o.item) return Promise.reject(new Error('Invalid item specified'));
     o.bin = o.item;
 
-    return Promise.all([
-      this.getSet(this.getPrimaryKey()).incr(o),
-      this.getSet(this.getSecondaryKey()).incr(o),
-    ]);
+    const promises = [
+      this.primarySet.incr(o),
+      this.secondarySet.incr(o),
+    ];
+
+    // auto decay every ~15min period or every 2500 increments
+    if (!this.lastScrubAndDecay || (this.lastScrubAndDecay + 900000) < Date.now() || this.incrSinceLastScrubAndDecay > 2500) {
+      promises.push(this.fetch({ limit: 1 }));
+      this.lastScrubAndDecay = Date.now();
+    }
+
+    this.incrSinceLastScrubAndDecay++;
+
+    return Promise.all(promises);
   }
 
   /**
    *
    * @param key
+   * @param secondary
    * @returns {*}
    */
-  getSet(key) {
-    return Set.get(key, this.hook);
+  getSet(key, secondary) {
+    return Set.get(key, secondary ? this.options.secondaryTime : this.options.time, this.hook);
   }
 
   /**
@@ -105,14 +127,11 @@ export default class Delta {
    * @private
    */
   _fetch(o) {
-    const primarySet = this.getSet(o.primary);
-    if (!primarySet) return Promise.reject(new Error('Unable to initialize primary Set!'));
-
-    const secondarySet = this.getSet(o.secondary);
-    if (!secondarySet) return Promise.reject(new Error('Unable to initialize secondary Set!'));
+    if (!this.primarySet) return Promise.reject(new Error('Unable to initialize primary Set!'));
+    if (!this.secondarySet) return Promise.reject(new Error('Unable to initialize secondary Set!'));
 
     /* eslint arrow-body-style:0 */
-    return Promise.join(primarySet.fetch(o), secondarySet.fetch(o), (count, norm) => {
+    return Promise.join(this.primarySet.fetch(o), this.secondarySet.fetch(o), (count, norm) => {
       return { count, norm };
     });
   }

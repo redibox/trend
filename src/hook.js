@@ -26,14 +26,15 @@ export default class Trends extends BaseHook {
    * Get an existing delta
    * @param name
    * @returns {Delta}
+   * @deprecated
    */
-  get(name) {
-    const _name = this.toKey(`${name}`);
-    return this.exists(name).then(exists => {
-      if (!exists) return Promise.reject(new Error(`Delta '${name}' does not exist!`));
-      return new Delta(_name, this);
-    });
-  }
+    // get(name) {
+    //   const _name = this.toKey(`${name}`);
+    //   return this.exists(name).then(exists => {
+    //     if (!exists) return Promise.reject(new Error(`Delta '${name}' does not exist!`));
+    //     return new Delta(_name, this);
+    //   });
+    // }
 
   /**
    * Get an existing delta or create it
@@ -49,7 +50,7 @@ export default class Trends extends BaseHook {
 
     return this.exists(o.name).then(exists => {
       if (!exists) {
-        return new Delta(o.name, this)
+        return new Delta(o.name, o, this)
           .init(o)
           .then(delta => {
             if (attach) this[o.name] = delta;
@@ -58,7 +59,7 @@ export default class Trends extends BaseHook {
       }
       // create default date if none specified
       o.date = o.date || new Date().getTime();
-      const _delta = new Delta(this.toKey(`${o.name}`), this);
+      const _delta = new Delta(this.toKey(`${o.name}`), o, this);
       if (attach) this[o.name] = _delta;
       return Promise.resolve(_delta);
     });
@@ -87,7 +88,7 @@ export default class Trends extends BaseHook {
     // all good, create default date if none specified
     o.date = o.date || new Date().getTime();
 
-    return new Delta(o.name, this).init(o);
+    return new Delta(o.name, o, this).init(o);
   }
 
   /**

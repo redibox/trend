@@ -51,14 +51,6 @@ Trend.create({
 });
 ```
 
-#### Get an existing trend (distribution)
-
-```js
-Trend.get('kittens').then(kittensTrend => {
-  // do things with your kittens trend
-});
-```
-
 #### Check if a trend exists
 
 ```js

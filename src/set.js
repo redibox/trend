@@ -23,9 +23,10 @@ function filter(arr, filters) {
 }
 
 export default class Set {
-  constructor(key, hook) {
+  constructor(key, lifetime, hook) {
     this.key = key;
     this.hook = hook;
+    this.lifetime = lifetime;
   }
 
   /**
@@ -60,19 +61,20 @@ export default class Set {
     if (!o.key) return Promise.reject(new Error('Invalid set key specified!'));
 
     const date = o.date || new Date().getTime();
-    const set = new Set(o.key, hook);
+    const set = new Set(o.key, o.time, hook);
 
-    return set.updateDecayDate(date).then(() => set.createLifetimeKey(o.time));
+    return set.updateDecayDate(date).then(() => set.createLifetimeKey(o.time)).then(() => set);
   }
 
   /**
    * Get an existing set
    * @param name
+   * @param lifetime
    * @param hook
    * @returns {Set}
    */
-  static get(name, hook) {
-    return new Set(name, hook);
+  static get(name, lifetime, hook) {
+    return new Set(name, lifetime, hook);
   }
 
   /**
@@ -124,7 +126,12 @@ export default class Set {
    * @returns {*}
    */
   getLifeTime() {
-    return this.hook.client.zscore(this.key, LIFETIME_KEY);
+    return this.hook.client.zscore(this.key, LIFETIME_KEY).then(date => {
+      if (!date) {
+        return this.createLifetimeKey(this.lifetime);
+      }
+      return parseFloat(date);
+    });
   }
 
   /**
@@ -132,7 +139,12 @@ export default class Set {
    * @returns {Promise.<Number>}
    */
   getLastDecayDate() {
-    return this.hook.client.zscore(this.key, LAST_DECAY_KEY).then(date => parseFloat(date));
+    return this.hook.client.zscore(this.key, LAST_DECAY_KEY).then(date => {
+      if (!date) {
+        return this.updateDecayDate(new Date().getTime());
+      }
+      return parseFloat(date);
+    });
   }
 
   /**
@@ -141,7 +153,7 @@ export default class Set {
    * @returns {*}
    */
   updateDecayDate(date) {
-    return this.hook.client.zadd(this.key, date, LAST_DECAY_KEY);
+    return this.hook.client.zadd(this.key, date, LAST_DECAY_KEY).then(() => date);
   }
 
   /**
@@ -175,7 +187,7 @@ export default class Set {
    * @returns {*}
    */
   createLifetimeKey(date) {
-    return this.hook.client.zadd(this.key, date, LIFETIME_KEY);
+    return this.hook.client.zadd(this.key, date, LIFETIME_KEY).then(() => date);
   }
 
   /**
@@ -188,7 +200,7 @@ export default class Set {
     return this
       .getLifeTime()
       .then(lifetime => {
-        const rate = 1 / parseFloat(lifetime);
+        const rate = 1 / lifetime;
         const multi = this.hook.client.multi();
 
         for (let i = 0, iLen = set.length; i < iLen; i++) {

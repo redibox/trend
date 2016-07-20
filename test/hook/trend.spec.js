@@ -16,6 +16,11 @@ function getDays(days) {
   return (new Date().getTime() + ((60 * 60 * 24 * 1000) * days));
 }
 
+const opts = {
+  name: dist,
+  time: getDays(14),
+};
+
 /**
  * Gets a delta an increments it
  * @param _bin
@@ -24,7 +29,7 @@ function getDays(days) {
  */
 function increment(_bin = bin, by = 1, cb) {
   return Hook
-    .get(dist)
+    .getOrCreate(opts)
     .then(delta => {
       delta.incr({
         item: _bin,
@@ -35,7 +40,6 @@ function increment(_bin = bin, by = 1, cb) {
 
 describe('trend', () => {
   it('should create default delta instances from config', () => {
-    // console.dir(Hook);
     expect(Hook.kittens instanceof Delta).to.equal(true);
     return Promise.resolve();
   });
@@ -51,7 +55,7 @@ describe('trend', () => {
   });
 
   it('should getOrCreate a delta instance that doesn\'t exist', () => {
-    const randName = (Math.random() * 100).toString(16);
+    const randName = Math.random().toString(36).slice(2);
     return Hook.getOrCreate({
       name: randName,
       time: getDays(14),
@@ -62,7 +66,7 @@ describe('trend', () => {
   });
 
   it('should getOrCreate a delta instance that doesn\'t exist and attach it to trend hook', () => {
-    const randName = (Math.random() * 100).toString(16);
+    const randName = Math.random().toString(36).slice(2);
     return Hook.getOrCreate({
       name: randName,
       time: getDays(14),
@@ -85,7 +89,7 @@ describe('trend', () => {
 
   it('should return a existing delta instance', () => {
     return Hook
-      .get(dist)
+      .getOrCreate(opts)
       .then(_delta => {
         expect(_delta instanceof Delta).to.equal(true);
         return Promise.resolve();
@@ -127,7 +131,7 @@ describe('trend', () => {
 
   it('should reject incr if no options provided', () => {
     return Hook
-      .get(dist)
+      .getOrCreate(opts)
       .then(delta => delta.incr())
       .catch(err => {
         expect(err instanceof Error).to.equal(true);
@@ -138,7 +142,7 @@ describe('trend', () => {
 
   it('should reject incr if no item is provided', () => {
     return Hook
-      .get(dist)
+      .getOrCreate(opts)
       .then(delta => {
         return delta.incr({
           foo: 'bar',
@@ -151,16 +155,17 @@ describe('trend', () => {
       });
   });
 
-  it('should reject on not finding a delta instance', () => {
-    return Hook
-      .get('xyz_abc')
-      .then()
-      .catch(err => {
-        expect(err instanceof Error).to.equal(true);
-        expect(err.message.includes('does not exist')).to.equal(true);
-        return Promise.resolve();
-      });
-  });
+  // // .get() now deprecated and removed
+  // it('should reject on not finding a delta instance', () => {
+  //   return Hook
+  //     .get('xyz_abc')
+  //     .then()
+  //     .catch(err => {
+  //       expect(err instanceof Error).to.equal(true);
+  //       expect(err.message.includes('does not exist')).to.equal(true);
+  //       return Promise.resolve();
+  //     });
+  // });
 
   it('should increment several bins in the distribution', done => {
     let count = 0;
@@ -178,7 +183,7 @@ describe('trend', () => {
 
   it('should fetch all items in a distribution', () => {
     return Hook
-      .get(dist)
+      .getOrCreate(opts)
       .then(_delta => _delta.fetch())
       .then(results => {
         // console.dir(results);
@@ -190,7 +195,7 @@ describe('trend', () => {
 
   it('should fetch a specific number of items in a distribution', () => {
     return Hook
-      .get(dist)
+      .getOrCreate(opts)
       .then(_delta => _delta.fetch({ limit: 2 }))
       .then(results => {
         // console.dir(results);
@@ -203,7 +208,7 @@ describe('trend', () => {
   it('should fetch a specific item in a distribution', () => {
     const randBin = bins[Math.floor(Math.random() * bins.length)];
     return Hook
-      .get(dist)
+      .getOrCreate(opts)
       .then(_delta => _delta.fetch({ item: randBin }))
       .then(results => {
         // console.dir(results);
@@ -215,14 +220,14 @@ describe('trend', () => {
 
   it('should return the most trending item', (done) => {
     const randBin = bins[2];
-    increment(randBin, 12, () => {
+    increment(randBin, 99999, () => {
       return Hook
-        .get(dist)
-        .then(_delta => _delta.fetch({ limit: 1 }))
+        .getOrCreate(opts)
+        .then(_delta => _delta.fetch({ limit: 3 }))
         .then(results => {
           // console.dir(results);
           expect(results[0].item).to.equal(randBin);
-          expect(results.length).to.equal(1);
+          expect(results.length).to.equal(3);
           return done();
         });
     });
