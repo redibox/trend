@@ -15,7 +15,7 @@ function filter(arr, filters) {
     if (filters[arr[i]]) {
       i += 1;
     } else {
-      tmp.push({ item: arr[i], score: arr[++i] });
+      tmp.push({ item: Buffer.isBuffer(arr[i]) ? arr[i].toString() : arr[i], score: arr[++i] });
     }
   }
 
