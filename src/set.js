@@ -86,7 +86,7 @@ export default class Set {
    * @private
    */
   _fetch(options = {}) {
-    const limit = options.limit || 1;
+    const limit = options.limit || -1;
     const bufferedLimit = limit > 0 ? limit + (Set.specialKeys().length - 1) : limit;
 
     return this
