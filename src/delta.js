@@ -139,9 +139,12 @@ export default class Delta {
   /**
    *
    * @param options
+   * @param retries
    * @returns Promise
    */
-  fetch(options) {
+  fetch(options, retries = 1) {
+    if (retries > 6) return Promise.reject(new Error('Failed to fetch data after 5 retries, aborting!'));
+
     const o = options || {};
     o.decay = (typeof o.decay === 'undefined') ? true : !!o.decay;
     o.scrub = (typeof o.scrub === 'undefined') ? true : !!o.scrub;
@@ -149,9 +152,10 @@ export default class Delta {
 
     if (o.item) o.bin = o.item;
 
-    return this
-      ._fetch(this.fetchOptions(o.bin, o.scrub, o.decay, o.limit))
-      .then(sets => this.processResults(sets, o));
+    return this._fetch(this.fetchOptions(o.bin, o.scrub, o.decay, o.limit)).then(sets => {
+      if (sets.norm.length !== sets.count.length) return this.fetch(options, retries++);
+      return this.processResults(sets, o);
+    });
   }
 
   /**
