@@ -1,6 +1,8 @@
 const LAST_DECAY_KEY = '_last_decay';
 const LIFETIME_KEY = '_t';
 const HI_PASS_FILTER = 0.0001;
+import Promise from 'bluebird';
+
 
 /**
  *
@@ -110,7 +112,7 @@ export default class Set {
 
     if (!promises.length) return Promise.resolve();
     if (promises.length === 1) return promises[0];
-    return Promise.all(promises).then(results => results[promises.length - 1]);
+    return Promise.each(promises, promise => promise).then(results => results[promises.length - 1]);
   }
 
   /**
