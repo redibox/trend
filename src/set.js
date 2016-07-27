@@ -185,10 +185,11 @@ export default class Set {
 
   /**
    *
-   * @param date
+   * @param seconds
    * @returns {*}
    */
-  createLifetimeKey(date) {
+  createLifetimeKey(seconds) {
+    const date = new Date().getTime() + (seconds * 1000);
     return this.hook.client.zadd(this.key, date, LIFETIME_KEY).then(() => date);
   }
 
